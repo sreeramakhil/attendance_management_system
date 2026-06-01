@@ -63,17 +63,29 @@
     const srn  = document.getElementById("srn").value.trim().toUpperCase();
     if (!name || !srn) { showAlert("reg-alert", "Enter both name and SRN.", "error"); return; }
 
-    const res  = await fetch(`${API}/register`, {
-      method: "POST", credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, srn })
-    });
-    const data = await res.json();
-    showAlert("reg-alert", data.message, data.success ? "success" : "error");
-    if (data.success) {
-      document.getElementById("name").value   = "";
-      document.getElementById("srn").value    = "";
-      document.getElementById("qr-srn").value = srn;
+    const btn = document.querySelector("button[onclick='registerStudent()']");
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner" style="display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle;"></div> Registering on Blockchain...`;
+
+    try {
+      const res  = await fetch(`${API}/register`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, srn })
+      });
+      const data = await res.json();
+      showAlert("reg-alert", data.message, data.success ? "success" : "error");
+      if (data.success) {
+        document.getElementById("name").value   = "";
+        document.getElementById("srn").value    = "";
+        document.getElementById("qr-srn").value = srn;
+      }
+    } catch (e) {
+      showAlert("reg-alert", "Failed to register. Check backend connection.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origText;
     }
   }
 
