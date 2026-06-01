@@ -140,6 +140,20 @@
   }
 
   async function submitAttendance(srn, subject, token) {
+    const scanBtn = document.getElementById("scan-btn");
+    const directBtn = document.getElementById("direct-btn");
+    const origScanText = scanBtn.textContent;
+    const origDirectText = directBtn.textContent;
+    
+    scanBtn.disabled = true;
+    directBtn.disabled = true;
+    
+    if (directToken) {
+      directBtn.innerHTML = `<div class="spinner" style="display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle;"></div> Marking Attendance on Blockchain...`;
+    } else {
+      scanBtn.innerHTML = `<div class="spinner" style="display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle;"></div> Marking...`;
+    }
+
     try {
       const res  = await fetch(`${API}/session/attend`, {
         method:  "POST",
@@ -177,6 +191,11 @@
       document.getElementById("result-msg").textContent  = "Cannot connect to server.";
       document.getElementById("hash-info").style.display = "none";
       document.getElementById("result-card").style.display = "block";
+    } finally {
+      scanBtn.disabled = false;
+      directBtn.disabled = false;
+      scanBtn.textContent = origScanText;
+      directBtn.textContent = origDirectText;
     }
   }
 
@@ -220,7 +239,6 @@
     if (!srn) { showAlert("Enter your SRN first.", "error"); return; }
 
     const directBtn = document.getElementById("direct-btn");
-    const origBtnText = directBtn.textContent;
 
     // Reset coordinates
     studentLat = null;
@@ -233,16 +251,11 @@
       (pos) => {
         studentLat = pos.coords.latitude;
         studentLon = pos.coords.longitude;
-        directBtn.disabled = false;
-        directBtn.textContent = origBtnText;
 
         showAlert(`📍 GPS Captured: <strong>${studentLat.toFixed(5)}, ${studentLon.toFixed(5)}</strong>. Submitting...`, "success");
         setTimeout(() => submitAttendance(srn, subject, directToken), 800);
       },
       (err) => {
-        directBtn.disabled = false;
-        directBtn.textContent = origBtnText;
-
         showAlert(`⚠️ GPS Access Failed: ${err.message}. Submitting check-in as fallback...`, "error");
         setTimeout(() => submitAttendance(srn, subject, directToken), 1500);
       },

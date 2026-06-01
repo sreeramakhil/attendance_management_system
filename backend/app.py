@@ -193,24 +193,28 @@ def login_required(f):
 
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
+import threading
+tx_lock = threading.Lock()
+
 def send_tx(fn):
-    if not OWNER_PRIVATE_KEY:
-        tx_hash = fn.transact({"from": OWNER_ACCOUNT, "gas": 300000})
+    with tx_lock:
+        if not OWNER_PRIVATE_KEY:
+            tx_hash = fn.transact({"from": OWNER_ACCOUNT, "gas": 300000})
+            return w3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        # Public network signed transaction execution
+        nonce = w3.eth.get_transaction_count(OWNER_ACCOUNT)
+        built_tx = fn.build_transaction({
+            'from': OWNER_ACCOUNT,
+            'gas': 300000,
+            'gasPrice': w3.eth.gas_price,
+            'nonce': nonce,
+        })
+        
+        signed_tx = w3.eth.account.sign_transaction(built_tx, private_key=OWNER_PRIVATE_KEY)
+        raw_tx = getattr(signed_tx, "raw_transaction", getattr(signed_tx, "rawTransaction", None))
+        tx_hash = w3.eth.send_raw_transaction(raw_tx)
         return w3.eth.wait_for_transaction_receipt(tx_hash)
-    
-    # Public network signed transaction execution
-    nonce = w3.eth.get_transaction_count(OWNER_ACCOUNT)
-    built_tx = fn.build_transaction({
-        'from': OWNER_ACCOUNT,
-        'gas': 300000,
-        'gasPrice': w3.eth.gas_price,
-        'nonce': nonce,
-    })
-    
-    signed_tx = w3.eth.account.sign_transaction(built_tx, private_key=OWNER_PRIVATE_KEY)
-    raw_tx = getattr(signed_tx, "raw_transaction", getattr(signed_tx, "rawTransaction", None))
-    tx_hash = w3.eth.send_raw_transaction(raw_tx)
-    return w3.eth.wait_for_transaction_receipt(tx_hash)
 
 def today():
     return datetime.now().strftime("%Y-%m-%d")
