@@ -1,5 +1,8 @@
 // auth.js — include this in every protected page
-const API = `http://${window.location.hostname}:5000`;
+const isLocal = window.location.hostname === "localhost" || 
+                window.location.hostname === "127.0.0.1" || 
+                window.location.hostname.startsWith("192.168.");
+const API = isLocal ? `http://${window.location.hostname}:5000` : "https://securattend-api.onrender.com";
 
 // Global Fetch Interceptor to automatically add X-Teacher-Username header
 const originalFetch = window.fetch;

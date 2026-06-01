@@ -63,7 +63,10 @@
 </div>
 
 <script>
-  const API = `http://${window.location.hostname}:5000`;
+  const isLocal = window.location.hostname === "localhost" || 
+                  window.location.hostname === "127.0.0.1" || 
+                  window.location.hostname.startsWith("192.168.");
+  const API = isLocal ? `http://${window.location.hostname}:5000` : "https://securattend-api.onrender.com";
   let scanner = null;
   let studentLat = null;
   let studentLon = null;
