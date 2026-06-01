@@ -21,6 +21,7 @@
 - [Smart Contracts](#smart-contracts)
 - [Contributing](#contributing)
 - [License](#license)
+- [Copyright](#copyright)
 - [Contact](#contact)
 
 ## 🎯 Overview
@@ -273,11 +274,62 @@ Contributions are welcome! Follow these steps:
 
 This project is currently unlicensed. See the LICENSE file for more details.
 
+## © Copyright
+
+**Copyright © 2026 Sreeram Akhil. All rights reserved.**
+
+This project and all its contents, including but not limited to:
+- Source code
+- Documentation
+- Images and graphics
+- Design and layout
+- Smart contracts
+- Database schemas
+- API specifications
+
+are the intellectual property of **Sreeram Akhil** unless otherwise stated.
+
+### Permitted Uses
+- ✅ Viewing and studying the code for educational purposes
+- ✅ Forking and modifying for personal use
+- ✅ Creating pull requests to contribute improvements
+- ✅ Using the application for non-commercial purposes
+
+### Restricted Uses
+- ❌ Redistribution without attribution
+- ❌ Commercial use without explicit permission
+- ❌ Removing or altering copyright notices
+- ❌ Claiming ownership of the project or its components
+- ❌ Publishing modified versions as your own
+
+### Third-Party Components
+
+This project uses the following open-source libraries and frameworks:
+- Python libraries (see `requirements.txt`)
+- JavaScript libraries (see `package.json`)
+- Solidity libraries (see smart contracts)
+
+Each third-party component is governed by its respective license. Please refer to individual license files for details.
+
+### Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+### Contact for Licensing
+
+For inquiries regarding commercial use, licensing agreements, or other copyright-related matters, please contact:
+
+**Email**: akhilsreeram663@gmail.com  
+**GitHub**: [@sreeramakhil](https://github.com/sreeramakhil)
+
+---
+
 ## 📧 Contact
 
 **Developer**: [sreeramakhil](https://github.com/sreeramakhil)
 
 - **GitHub**: [@sreeramakhil](https://github.com/sreeramakhil)
+- **Email**: akhilsreeram663@gmail.com
 - **Live Demo**: [securattend.vercel.app](https://securattend.vercel.app)
 - **Repository**: [attendance_management_system](https://github.com/sreeramakhil/attendance_management_system)
 
