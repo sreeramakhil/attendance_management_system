@@ -39,16 +39,23 @@ OWNER_PRIVATE_KEY = os.environ.get("OWNER_PRIVATE_KEY")
 if OWNER_PRIVATE_KEY:
     OWNER_PRIVATE_KEY = OWNER_PRIVATE_KEY.strip('"\' ')
 
+# Boot Diagnostics (instantly flushed to Render logs)
+print(f"[BOOT] SEPOLIA_RPC_URL present: {bool(SEPOLIA_RPC_URL)}", flush=True)
+print(f"[BOOT] OWNER_PRIVATE_KEY present: {bool(OWNER_PRIVATE_KEY)}", flush=True)
+print(f"[BOOT] CONTRACT_ADDRESS env present: {bool(CONTRACT_ADDRESS_ENV)}", flush=True)
+
 if SEPOLIA_RPC_URL:
+    print(f"[BOOT] Connecting to Sepolia RPC: {SEPOLIA_RPC_URL[:30]}...", flush=True)
     w3 = Web3(Web3.HTTPProvider(SEPOLIA_RPC_URL))
-    print(f"[INFO] Connected to Public RPC: {SEPOLIA_RPC_URL}")
 else:
+    print("[BOOT] No Sepolia RPC URL provided. Falling back to local Ganache...", flush=True)
     GANACHE_URL = "http://127.0.0.1:7546"
     w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
-    print("[INFO] Connected to Local Ganache")
 
 if not w3.is_connected():
-    raise Exception("Cannot connect to Ethereum network.")
+    raise Exception("[FATAL] Cannot connect to Ethereum network. Check your RPC URL and network connectivity.")
+
+print("[BOOT] Ethereum connection established successfully!", flush=True)
 
 # ─── Load Contract ─────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -60,14 +67,21 @@ with open(ABI_PATH, "r") as f:
 CONTRACT_ADDRESS = CONTRACT_ADDRESS_ENV if CONTRACT_ADDRESS_ENV else contract_data["address"]
 CONTRACT_ABI     = contract_data["abi"]
 
+print(f"[BOOT] Loading contract at address: {CONTRACT_ADDRESS}", flush=True)
 contract      = w3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
 
 if OWNER_PRIVATE_KEY:
     OWNER_ACCOUNT = w3.eth.account.from_key(OWNER_PRIVATE_KEY).address
-    print(f"[INFO] Using private-key signed owner account: {OWNER_ACCOUNT}")
+    print(f"[BOOT] Using private-key signed owner account: {OWNER_ACCOUNT}", flush=True)
 else:
-    OWNER_ACCOUNT = w3.eth.accounts[0]
-    print(f"[INFO] Using local Ganache owner account: {OWNER_ACCOUNT}")
+    if SEPOLIA_RPC_URL:
+        raise Exception("[FATAL] OWNER_PRIVATE_KEY environment variable is required when connecting to Sepolia testnet.")
+    
+    if len(w3.eth.accounts) > 0:
+        OWNER_ACCOUNT = w3.eth.accounts[0]
+        print(f"[BOOT] Using local Ganache owner account: {OWNER_ACCOUNT}", flush=True)
+    else:
+        raise Exception("[FATAL] No Ethereum accounts found on local Ganache network.")
 
 # ─── Local Database for raw GPS logging and Proxy Audit ────────────────────────
 LOG_FILE = os.path.join(BASE_DIR, "attendance_gps_log.json")
@@ -605,4 +619,6 @@ def get_all_reports():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"[BOOT] Starting Flask app on port {port}...", flush=True)
+    app.run(debug=False, host="0.0.0.0", port=port)
