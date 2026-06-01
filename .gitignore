@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# IDE / System Logs
+.gemini/
+.system_generated/
+.vscode/
+.idea/
+*.log
+
+# Truffle artifacts (can be recompiled, but safe to ignore if contract address is env-driven)
+# blockchain/build/
+
+# Node modules (Truffle dependencies)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db

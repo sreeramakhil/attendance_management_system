@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Attendance</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="studentscan.html">⛓ Student Attendance</a>
+</nav>
+
+<div class="container" style="max-width:480px;">
+  <h1>Mark My Attendance</h1>
+
+  <div class="card">
+    <p style="font-size:13px;color:#718096;margin-bottom:16px;">
+      Enter your SRN, then scan the QR code shown on the teacher's screen.
+    </p>
+    <div class="form-group">
+      <label>Your SRN</label>
+      <input type="text" id="srn" placeholder="e.g. PES1UG21CS001" style="text-transform:uppercase"/>
+    </div>
+    <div class="form-group">
+      <label for="subject">Subject</label>
+      <select id="subject">
+        <option value="">-- Select Subject --</option>
+        <option>Blockchain Technology</option>
+        <option>Data Structures</option>
+        <option>Operating Systems</option>
+        <option>Computer Networks</option>
+        <option>Database Management</option>
+        <option>Software Engineering</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" id="scan-btn" onclick="startScan()">Scan Teacher's QR Code</button>
+    <button class="btn btn-green btn-full" id="direct-btn" style="display:none;box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);" onclick="submitDirect()">🚀 Confirm & Mark Attendance</button>
+    <div class="alert" id="scan-alert"></div>
+  </div>
+
+  <div class="card" id="scanner-card" style="display:none;">
+    <p style="font-size:13px;color:#718096;margin-bottom:12px;">Point your camera at the QR on the teacher's screen:</p>
+    <div id="qr-reader" style="width:100%;"></div>
+    <button onclick="stopScan()" class="btn btn-full" style="background:#e2e8f0;color:#4a5568;margin-top:12px;">Cancel</button>
+  </div>
+
+  <div class="card" id="result-card" style="display:none;text-align:center;">
+    <div id="result-icon" style="font-size:48px;margin-bottom:8px;"></div>
+    <div id="result-msg" style="font-size:16.5px;font-weight:600;margin-bottom:8px;"></div>
+    
+    <!-- Verified Blockchain Hash display -->
+    <div id="hash-info" style="margin: 18px 0; display: none;">
+      <p style="font-size:12px;color:#9ca3af;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">🔐 Verified Blockchain Record Hash</p>
+      <div id="result-hash" class="code-hash" style="word-break: break-all;" title="Click to copy hash"></div>
+      <p style="font-size:11px;color:#06b6d4;margin-top:6px;">⚡ Click hash to copy</p>
+    </div>
+    
+    <button onclick="resetScan()" class="btn btn-primary" style="margin-top:10px;width:100%;">Done</button>
+  </div>
+</div>
+
+<script>
+  const API = `http://${window.location.hostname}:5000`;
+  let scanner = null;
+  let studentLat = null;
+  let studentLon = null;
+
+  function showAlert(message, type) {
+    const el = document.getElementById("scan-alert");
+    el.className = `alert show alert-${type}`;
+    el.innerHTML = message;
+  }
+
+  function startScan() {
+    const srn     = document.getElementById("srn").value.trim().toUpperCase();
+    const subject = document.getElementById("subject").value;
+    if (!srn)     { showAlert("Enter your SRN first.", "error"); return; }
+    if (!subject) { showAlert("Select a subject first.", "error"); return; }
+
+    const scanBtn = document.querySelector(".btn-primary");
+    const origBtnText = scanBtn.textContent;
+
+    // Reset coordinates
+    studentLat = null;
+    studentLon = null;
+
+    showAlert("<div class='spinner'></div> Capturing GPS Location...", "success");
+    scanBtn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        studentLat = pos.coords.latitude;
+        studentLon = pos.coords.longitude;
+        scanBtn.disabled = false;
+        scanBtn.textContent = origBtnText;
+
+        showAlert(`📍 GPS Captured: <strong>${studentLat.toFixed(5)}, ${studentLon.toFixed(5)}</strong>. Starting Camera...`, "success");
+        setTimeout(() => launchScanner(srn, subject), 800);
+      },
+      (err) => {
+        scanBtn.disabled = false;
+        scanBtn.textContent = origBtnText;
+
+        // Fallback: Proceed anyway (will only succeed if teacher has geofence disabled)
+        showAlert(`⚠️ GPS Access Failed: ${err.message}. Proceeding camera scan as fallback...`, "error");
+        setTimeout(() => launchScanner(srn, subject), 2000);
+      },
+      { enableHighAccuracy: true, timeout: 6000 }
+    );
+  }
+
+  function launchScanner(srn, subject) {
+    document.getElementById("scanner-card").style.display = "block";
+    document.getElementById("scan-alert").className = "alert";
+
+    scanner = new Html5Qrcode("qr-reader");
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      async (token) => {
+        await stopScan();
+        await submitAttendance(srn, subject, token.trim());
+      },
+      () => {}
+    ).catch(e => showAlert("Camera error: " + e, "error"));
+  }
+
+  async function stopScan() {
+    if (scanner) {
+      try { await scanner.stop(); } catch(e) {}
+      scanner = null;
+    }
+    document.getElementById("scanner-card").style.display = "none";
+  }
+
+  async function submitAttendance(srn, subject, token) {
+    try {
+      const res  = await fetch(`${API}/session/attend`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ 
+          srn, 
+          subject, 
+          token,
+          latitude: studentLat,
+          longitude: studentLon
+        })
+      });
+      const data = await res.json();
+
+      document.getElementById("result-icon").textContent = data.success ? "✅" : "❌";
+      document.getElementById("result-msg").textContent  = data.message;
+      
+      const hashInfo = document.getElementById("hash-info");
+      const resultHash = document.getElementById("result-hash");
+      
+      if (data.success && data.location_hash) {
+        resultHash.textContent = data.location_hash;
+        resultHash.onclick = () => {
+          navigator.clipboard.writeText(data.location_hash);
+          alert("Transaction Location Hash copied!");
+        };
+        hashInfo.style.display = "block";
+      } else {
+        hashInfo.style.display = "none";
+      }
+
+      document.getElementById("result-card").style.display = "block";
+    } catch (e) {
+      document.getElementById("result-icon").textContent = "❌";
+      document.getElementById("result-msg").textContent  = "Cannot connect to server.";
+      document.getElementById("hash-info").style.display = "none";
+      document.getElementById("result-card").style.display = "block";
+    }
+  }
+
+  function resetScan() {
+    document.getElementById("result-card").style.display = "none";
+    document.getElementById("srn").value     = "";
+    document.getElementById("subject").value = "";
+    document.getElementById("scan-alert").className = "alert";
+    
+    // If opened via direct link, reload to reset page state
+    if (directToken) {
+      window.location.search = "";
+    }
+  }
+
+  // Clickable URL Check-in Logic
+  let directToken = null;
+
+  function checkUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    const subject = urlParams.get("subject");
+
+    if (token && subject) {
+      directToken = token;
+      
+      const selectEl = document.getElementById("subject");
+      selectEl.value = subject;
+      selectEl.disabled = true; // Fix selection to prevent tamper
+
+      document.getElementById("scan-btn").style.display = "none";
+      document.getElementById("direct-btn").style.display = "block";
+
+      showAlert("💡 <strong>QR Scanned via Camera Link!</strong> Enter your SRN, then click the confirm button below to check-in.", "success");
+    }
+  }
+
+  function submitDirect() {
+    const srn = document.getElementById("srn").value.trim().toUpperCase();
+    const subject = document.getElementById("subject").value;
+    if (!srn) { showAlert("Enter your SRN first.", "error"); return; }
+
+    const directBtn = document.getElementById("direct-btn");
+    const origBtnText = directBtn.textContent;
+
+    // Reset coordinates
+    studentLat = null;
+    studentLon = null;
+
+    showAlert("<div class='spinner'></div> Capturing GPS Location...", "success");
+    directBtn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        studentLat = pos.coords.latitude;
+        studentLon = pos.coords.longitude;
+        directBtn.disabled = false;
+        directBtn.textContent = origBtnText;
+
+        showAlert(`📍 GPS Captured: <strong>${studentLat.toFixed(5)}, ${studentLon.toFixed(5)}</strong>. Submitting...`, "success");
+        setTimeout(() => submitAttendance(srn, subject, directToken), 800);
+      },
+      (err) => {
+        directBtn.disabled = false;
+        directBtn.textContent = origBtnText;
+
+        showAlert(`⚠️ GPS Access Failed: ${err.message}. Submitting check-in as fallback...`, "error");
+        setTimeout(() => submitAttendance(srn, subject, directToken), 1500);
+      },
+      { enableHighAccuracy: true, timeout: 6000 }
+    );
+  }
+
+  // Trigger check on load
+  checkUrlParams();
+</script>
+</body>
+</html>

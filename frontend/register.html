@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register Student</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">⛓ Blockchain Attendance</a>
+  <a href="register.html">Register Student</a>
+  <a href="attendance.html">Mark Attendance</a>
+  <a href="report.html">Reports</a>
+  <span id="teacher-name" style="color:#c3cfff;font-size:13px;margin-left:auto;"></span>
+  <button onclick="logout()" class="btn" style="background:#c53030;color:#fff;padding:6px 14px;font-size:13px;margin-left:12px;">Logout</button>
+</nav>
+
+<div class="container">
+  <h1>Register Student</h1>
+
+  <div class="card">
+    <div class="form-group">
+      <label>Student Name</label>
+      <input type="text" id="name" placeholder="e.g. Arjun Sharma"/>
+    </div>
+    <div class="form-group">
+      <label>SRN (Student Registration Number)</label>
+      <input type="text" id="srn" placeholder="e.g. PES1UG21CS001" style="text-transform:uppercase"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="registerStudent()">Register on Blockchain</button>
+    <div class="alert" id="reg-alert"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin-bottom:16px;">Generate QR Code</h2>
+    <div class="form-group">
+      <label>Enter SRN</label>
+      <input type="text" id="qr-srn" placeholder="e.g. PES1UG21CS001" style="text-transform:uppercase"/>
+    </div>
+    <button class="btn btn-green btn-full" onclick="generateQR()">Generate QR Code</button>
+    <div class="alert" id="qr-alert"></div>
+    <div class="qr-box" id="qr-box" style="display:none;">
+      <img id="qr-img" src="" alt="QR Code" width="200" height="200"/>
+      <br/>
+      <a id="qr-download" download="qr.png" class="btn btn-primary" style="margin-top:8px;">Download QR</a>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  function showAlert(id, message, type) {
+    const el = document.getElementById(id);
+    el.className = `alert show alert-${type}`;
+    el.textContent = message;
+    setTimeout(() => el.className = "alert", 4000);
+  }
+
+  async function registerStudent() {
+    const name = document.getElementById("name").value.trim();
+    const srn  = document.getElementById("srn").value.trim().toUpperCase();
+    if (!name || !srn) { showAlert("reg-alert", "Enter both name and SRN.", "error"); return; }
+
+    const res  = await fetch(`${API}/register`, {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, srn })
+    });
+    const data = await res.json();
+    showAlert("reg-alert", data.message, data.success ? "success" : "error");
+    if (data.success) {
+      document.getElementById("name").value   = "";
+      document.getElementById("srn").value    = "";
+      document.getElementById("qr-srn").value = srn;
+    }
+  }
+
+  async function generateQR() {
+    const srn = document.getElementById("qr-srn").value.trim().toUpperCase();
+    if (!srn) { showAlert("qr-alert", "Enter an SRN first.", "error"); return; }
+
+    const res  = await fetch(`${API}/generate_qr/${srn}`, { credentials: "include" });
+    const data = await res.json();
+    if (!data.success) { showAlert("qr-alert", data.message, "error"); return; }
+
+    const src = `data:image/png;base64,${data.qr_image}`;
+    document.getElementById("qr-img").src              = src;
+    document.getElementById("qr-download").href        = src;
+    document.getElementById("qr-download").download    = `QR_${srn}.png`;
+    document.getElementById("qr-box").style.display    = "block";
+    showAlert("qr-alert", `QR generated for ${srn}`, "success");
+  }
+</script>
+</body>
+</html>

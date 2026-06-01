@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Report</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .badge-orange {
+      background: rgba(245, 158, 11, 0.15) !important;
+      color: #fbbf24 !important;
+      border: 1px solid rgba(245, 158, 11, 0.3) !important;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+    }
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.15) !important;
+      color: #22d3ee !important;
+      border: 1px solid rgba(6, 182, 212, 0.3) !important;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">⛓ Blockchain Attendance</a>
+  <a href="register.html">Register Student</a>
+  <a href="attendance.html">Mark Attendance</a>
+  <a href="report.html">Reports</a>
+  <span id="teacher-name" style="color:#c3cfff;font-size:13px;margin-left:auto;"></span>
+  <button onclick="logout()" class="btn" style="background:#c53030;color:#fff;padding:6px 14px;font-size:13px;margin-left:12px;">Logout</button>
+</nav>
+
+<div class="container">
+  <h1>Attendance Report</h1>
+
+  <div class="card">
+    <div class="form-group">
+      <label>Student SRN</label>
+      <input type="text" id="report-srn" placeholder="e.g. PES1UG21CS001" style="text-transform:uppercase"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="fetchReport()">View Report from Blockchain</button>
+    <div class="alert" id="report-alert"></div>
+  </div>
+
+  <!-- Global Audit Card -->
+  <div class="card" id="global-audit-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-size:16.5px;margin:0;display:flex;align-items:center;gap:8px;">
+        🛡️ Global Attendance &amp; Proxy Audit
+      </h2>
+      <button class="btn btn-green" onclick="downloadCSV()" style="box-shadow:0 4px 12px rgba(16, 185, 129, 0.2);">
+        📥 Download CSV Report
+      </button>
+    </div>
+    
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>SRN</th>
+            <th>Name</th>
+            <th>Subject</th>
+            <th>Date &amp; Time</th>
+            <th>GPS Coordinates</th>
+            <th>Check-in Status</th>
+            <th>Proxy Assessment</th>
+          </tr>
+        </thead>
+        <tbody id="global-audit-body">
+          <tr><td colspan="7" style="text-align:center;color:#718096;">Loading audit database...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="student-info" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:18px;font-weight:600;" id="info-name"></div>
+        <div style="font-size:13px;color:#718096;" id="info-srn"></div>
+      </div>
+      <span class="badge badge-green">Verified on Blockchain</span>
+    </div>
+  </div>
+
+  <div class="stats" id="summary-stats" style="display:none;"></div>
+
+  <div class="card" id="records-card" style="display:none;">
+    <h2 style="font-size:16px;margin-bottom:16px;">Full Attendance Log</h2>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>#</th><th>Subject</th><th>Date &amp; Time</th><th>Location Hash</th><th>Status</th></tr></thead>
+        <tbody id="records-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  let globalRecords = [];
+
+  function showAlert(id, message, type) {
+    const el = document.getElementById(id);
+    el.className = `alert show alert-${type}`;
+    el.textContent = message;
+    setTimeout(() => el.className = "alert", 5000);
+  }
+
+  async function fetchReport() {
+    const srn = document.getElementById("report-srn").value.trim().toUpperCase();
+    if (!srn) { showAlert("report-alert", "Enter an SRN.", "error"); return; }
+
+    const res  = await fetch(`${API}/records/${srn}`, { credentials: "include" });
+    const data = await res.json();
+
+    if (!data.success) { showAlert("report-alert", data.message, "error"); return; }
+
+    document.getElementById("info-name").textContent          = data.student.name;
+    document.getElementById("info-srn").textContent           = data.student.srn;
+    document.getElementById("student-info").style.display     = "block";
+
+    const subjectMap = {};
+    data.records.forEach(r => { subjectMap[r.subject] = (subjectMap[r.subject] || 0) + 1; });
+
+    const stats = document.getElementById("summary-stats");
+    stats.style.display = "flex";
+    stats.innerHTML = Object.entries(subjectMap).map(([sub, cnt]) => `
+      <div class="stat-card"><div class="num">${cnt}</div><div class="lbl">${sub}</div></div>
+    `).join("") + `
+      <div class="stat-card"><div class="num">${data.records.length}</div><div class="lbl">Total Sessions</div></div>
+    `;
+
+    document.getElementById("records-card").style.display = "block";
+    const tbody = document.getElementById("records-body");
+    tbody.innerHTML = data.records.map((r, i) => {
+      const fullHash = r.locationHash || "0x0";
+      const shortHash = fullHash.length > 18 
+        ? `${fullHash.slice(0, 10)}...${fullHash.slice(-6)}` 
+        : fullHash;
+      
+      return `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${r.subject}</td>
+          <td>${new Date(r.timestamp * 1000).toLocaleString()}</td>
+          <td>
+            <span class="code-hash" onclick="navigator.clipboard.writeText('${fullHash}'); alert('Full on-chain Location Hash copied to clipboard:\\n\\n${fullHash}')" title="Click to copy full hash">
+              ${shortHash}
+            </span>
+          </td>
+          <td><span class="badge badge-green">Present</span></td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  // Fetch all local and synced GPS records for global proxy audit
+  async function fetchGlobalAudit() {
+    try {
+      const res = await fetch(`${API}/session/reports/all`, { credentials: "include" });
+      const data = await res.json();
+      if (!data.success) return;
+
+      globalRecords = data.records || [];
+      const tbody = document.getElementById("global-audit-body");
+      
+      if (!globalRecords.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#718096;">No check-in audit records found. Scan some QRs first!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = globalRecords.map(r => {
+        let proxyBadge = "";
+        if (r.is_proxy.includes("Possible Proxy")) {
+          proxyBadge = `<span class="badge badge-orange">⚠️ Possible Proxy</span>`;
+        } else if (r.is_proxy.includes("Teacher Override")) {
+          proxyBadge = `<span class="badge badge-cyan">👤 Teacher Verified</span>`;
+        } else {
+          proxyBadge = `<span class="badge badge-green">✅ Verified</span>`;
+        }
+
+        const dateStr = new Date(r.timestamp * 1000).toLocaleString();
+        
+        let coordsStr = "";
+        if (r.latitude === "Mock/None" || r.latitude === "N/A" || !r.latitude) {
+          coordsStr = `<span style="color:#718096;font-size:12.5px;">N/A (Mock/Presentation)</span>`;
+        } else {
+          coordsStr = `<span style="color:#06b6d4;font-family:monospace;font-size:12.5px;">${parseFloat(r.latitude).toFixed(5)}, ${parseFloat(r.longitude).toFixed(5)}</span>`;
+        }
+
+        return `
+          <tr>
+            <td style="font-weight:600;color:#e2e8f0;font-size:13.5px;">${r.srn}</td>
+            <td>${r.name}</td>
+            <td style="color:#9ca3af;">${r.subject}</td>
+            <td>${dateStr}</td>
+            <td>${coordsStr}</td>
+            <td style="font-size:13px;color:#9ca3af;">${r.status}</td>
+            <td>${proxyBadge}</td>
+          </tr>
+        `;
+      }).join("");
+    } catch (e) {
+      console.error("Failed to load audit records", e);
+    }
+  }
+
+  // Generate and download CSV report
+  function downloadCSV() {
+    if (!globalRecords.length) {
+      alert("No attendance records to download!");
+      return;
+    }
+
+    const headers = ["SRN", "Student Name", "Subject", "Date & Time", "Latitude", "Longitude", "Verification Status", "Proxy Assessment", "On-Chain Location Hash"];
+    const csvRows = [headers.join(",")];
+
+    globalRecords.forEach(r => {
+      const dateStr = new Date(r.timestamp * 1000).toLocaleString().replace(/,/g, "");
+      const row = [
+        `"${r.srn}"`,
+        `"${r.name}"`,
+        `"${r.subject}"`,
+        `"${dateStr}"`,
+        `"${r.latitude}"`,
+        `"${r.longitude}"`,
+        `"${r.status.replace(/"/g, '""')}"`,
+        `"${r.is_proxy}"`,
+        `"${r.location_hash}"`
+      ];
+      csvRows.push(row.join(","));
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Attendance_Proxy_Audit_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Auto-load global proxy audit when page loads
+  fetchGlobalAudit();
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mark Attendance</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">⛓ Blockchain Attendance</a>
+  <a href="register.html">Register Student</a>
+  <a href="attendance.html">Mark Attendance</a>
+  <a href="report.html">Reports</a>
+  <span id="teacher-name" style="color:#c3cfff;font-size:13px;margin-left:auto;"></span>
+  <button onclick="logout()" class="btn" style="background:#c53030;color:#fff;padding:6px 14px;font-size:13px;margin-left:12px;">Logout</button>
+</nav>
+
+<div class="container">
+  <h1>Mark Attendance</h1>
+
+  <div class="card">
+    <div class="form-group">
+      <label for="subject">Subject</label>
+      <select id="subject">
+        <option value="">-- Select Subject --</option>
+        <option>Blockchain Technology</option>
+        <option>Data Structures</option>
+        <option>Operating Systems</option>
+        <option>Computer Networks</option>
+        <option>Database Management</option>
+        <option>Software Engineering</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <button class="btn btn-primary" id="tab-qr" style="box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);" onclick="switchTab('qr')">Scan QR Code</button>
+    <button class="btn"             id="tab-manual" onclick="switchTab('manual')"
+            style="background:rgba(255,255,255,0.06);color:#9ca3af;">Enter SRN Manually</button>
+  </div>
+
+  <div class="card" id="panel-qr">
+    <p style="font-size:13px;color:#718096;margin-bottom:14px;">Allow camera access, then hold the student's QR code in front of the camera.</p>
+    <div id="qr-reader" style="width:100%;max-width:400px;margin:0 auto;"></div>
+    <div style="text-align:center;margin-top:14px;">
+      <button class="btn btn-primary" onclick="startScanner()">Start Camera</button>
+      <button class="btn" onclick="stopScanner()" style="background:#e2e8f0;color:#4a5568;margin-left:8px;">Stop</button>
+    </div>
+    <div class="alert" id="qr-scan-alert"></div>
+  </div>
+
+  <div class="card" id="panel-manual" style="display:none;">
+    <div class="form-group">
+      <label>SRN</label>
+      <input type="text" id="manual-srn" placeholder="e.g. PES1UG21CS001" style="text-transform:uppercase"/>
+    </div>
+    <button class="btn btn-green btn-full" onclick="markManual()">Mark Attendance</button>
+    <div class="alert" id="manual-alert"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin-bottom:16px;">Marked This Session</h2>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Time</th><th>SRN</th><th>Subject</th><th>Marked By</th><th>Status</th></tr></thead>
+        <tbody id="log-body">
+          <tr><td colspan="5" style="text-align:center;color:#9ca3af;">No records yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  let scanner = null;
+  const log   = [];
+
+  function switchTab(tab) {
+    document.getElementById("panel-qr").style.display     = tab === "qr"     ? "block" : "none";
+    document.getElementById("panel-manual").style.display = tab === "manual" ? "block" : "none";
+    
+    document.getElementById("tab-qr").style.background     = tab === "qr"     ? "linear-gradient(135deg, #8b5cf6, #6366f1)" : "rgba(255,255,255,0.06)";
+    document.getElementById("tab-qr").style.color          = tab === "qr"     ? "#fff"                                      : "#9ca3af";
+    document.getElementById("tab-qr").style.boxShadow      = tab === "qr"     ? "0 4px 15px rgba(139, 92, 246, 0.3)"        : "none";
+    
+    document.getElementById("tab-manual").style.background = tab === "manual" ? "linear-gradient(135deg, #8b5cf6, #6366f1)" : "rgba(255,255,255,0.06)";
+    document.getElementById("tab-manual").style.color      = tab === "manual" ? "#fff"                                      : "#9ca3af";
+    document.getElementById("tab-manual").style.boxShadow  = tab === "manual" ? "0 4px 15px rgba(139, 92, 246, 0.3)"        : "none";
+    
+    if (tab !== "qr") stopScanner();
+  }
+
+  function startScanner() {
+    if (scanner) return;
+    scanner = new Html5Qrcode("qr-reader");
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      async (decodedText) => {
+        await markAttendance(decodedText.trim().toUpperCase(), "qr-scan-alert");
+      },
+      () => {}
+    ).catch(e => showAlert("qr-scan-alert", "Camera error: " + e, "error"));
+  }
+
+  function stopScanner() {
+    if (scanner) { scanner.stop().then(() => { scanner = null; }); }
+  }
+
+  async function markManual() {
+    const srn = document.getElementById("manual-srn").value.trim().toUpperCase();
+    if (!srn) { showAlert("manual-alert", "Enter an SRN.", "error"); return; }
+    await markAttendance(srn, "manual-alert");
+    document.getElementById("manual-srn").value = "";
+  }
+
+  async function markAttendance(srn, alertId) {
+    const subject = document.getElementById("subject").value;
+    if (!subject) { showAlert(alertId, "Select a subject first.", "error"); return; }
+
+    const res  = await fetch(`${API}/mark_attendance`, {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ srn, subject })
+    });
+    const data = await res.json();
+    showAlert(alertId, data.message, data.success ? "success" : "error");
+
+    if (data.success) {
+      log.unshift({ time: new Date().toLocaleTimeString(), srn, subject, by: data.marked_by });
+      renderLog();
+    }
+  }
+
+  function showAlert(id, message, type) {
+    const el = document.getElementById(id);
+    el.className = `alert show alert-${type}`;
+    el.textContent = message;
+    setTimeout(() => el.className = "alert", 5000);
+  }
+
+  function renderLog() {
+    document.getElementById("log-body").innerHTML = log.map(r => `
+      <tr>
+        <td>${r.time}</td>
+        <td>${r.srn}</td>
+        <td>${r.subject}</td>
+        <td>${r.by}</td>
+        <td><span class="badge badge-green">Marked</span></td>
+      </tr>
+    `).join("");
+  }
+</script>
+</body>
+</html>

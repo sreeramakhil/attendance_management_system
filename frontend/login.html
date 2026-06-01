@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Teacher Login</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">⛓ Blockchain Attendance</a>
+</nav>
+
+<div class="container" style="max-width:420px;">
+  <h1 style="margin-top:40px;">Teacher Login</h1>
+
+  <div class="card">
+    <p style="font-size:13px;color:#718096;margin-bottom:20px;">
+      Only authorized teachers can mark attendance and manage students.
+    </p>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="e.g. teacher1"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="login()">Login</button>
+    <div class="alert" id="login-alert"></div>
+
+    <div style="margin-top:20px;padding:14px;background:#f7fafc;border-radius:8px;font-size:12px;color:#718096;">
+      <strong>Default credentials:</strong><br/>
+      Username: <code>teacher1</code> &nbsp; Password: <code>teacher123</code><br/>
+      Username: <code>admin</code> &nbsp;&nbsp;&nbsp;&nbsp; Password: <code>admin123</code>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = `http://${window.location.hostname}:5000`;
+
+  // If already logged in, redirect to dashboard
+  fetch(`${API}/me`, { credentials: "include" })
+    .then(r => r.json())
+    .then(d => { if (d.logged_in) window.location.href = "index.html"; });
+
+  function showAlert(message, type) {
+    const el = document.getElementById("login-alert");
+    el.className = `alert show alert-${type}`;
+    el.textContent = message;
+  }
+
+  async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !password) {
+      showAlert("Enter username and password.", "error");
+      return;
+    }
+
+    try {
+      const res  = await fetch(`${API}/login`, {
+        method:      "POST",
+        credentials: "include",
+        headers:     { "Content-Type": "application/json" },
+        body:        JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem("teacher_username", username);
+        showAlert(data.message, "success");
+        setTimeout(() => window.location.href = "index.html", 800);
+      } else {
+        showAlert(data.message, "error");
+      }
+    } catch (e) {
+      showAlert("Cannot connect to backend. Is Flask running?", "error");
+    }
+  }
+
+  // Allow Enter key to submit
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter") login();
+  });
+</script>
+</body>
+</html>

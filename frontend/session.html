@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Session QR</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">⛓ Blockchain Attendance</a>
+  <a href="register.html">Register Student</a>
+  <a href="attendance.html">Mark Attendance</a>
+  <a href="session.html">Live Session</a>
+  <a href="report.html">Reports</a>
+  <span id="teacher-name" style="color:#c3cfff;font-size:13px;margin-left:auto;"></span>
+  <button onclick="logout()" class="btn" style="background:#c53030;color:#fff;padding:6px 14px;font-size:13px;margin-left:12px;">Logout</button>
+</nav>
+
+<div class="container">
+  <h1>Live Session QR</h1>
+
+  <!-- Session setup -->
+  <div class="card" id="setup-card">
+    <div class="form-group">
+      <label>Subject</label>
+      <select id="subject" title="Subject">
+        <option value="">-- Select Subject --</option>
+        <option>Blockchain Technology</option>
+        <option>Data Structures</option>
+        <option>Operating Systems</option>
+        <option>Computer Networks</option>
+        <option>Database Management</option>
+        <option>Software Engineering</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>QR Refresh Interval</label>
+      <select id="interval" title="QR Refresh Interval">
+        <option value="300" selected>Every 5 minutes (presentation mode)</option>
+        <option value="30">Every 30 seconds (recommended)</option>
+        <option value="60">Every 60 seconds</option>
+        <option value="15">Every 15 seconds (strict)</option>
+      </select>
+    </div>
+    <div style="border-top:1.5px solid rgba(255,255,255,0.06);margin-top:20px;padding-top:20px;">
+      <h3 style="font-size:14px;color:#9ca3af;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">📍 Geofence Configuration</h3>
+      <div class="form-group">
+        <label>Geofence Location Preset</label>
+        <select id="location-preset" onchange="toggleLocationFields()">
+          <option value="current">📡 Use My Current GPS Location</option>
+          <option value="seminar">🏛 CS Seminar Hall (Preset)</option>
+          <option value="lab">💻 Main Block Lab 202 (Preset)</option>
+          <option value="class">🚪 Classroom 101 (Preset)</option>
+          <option value="none">🌐 No Geofence / Mock Location (Presentation Mode)</option>
+        </select>
+      </div>
+      <div class="form-group" id="radius-container">
+        <label>Allowed Geofence Radius: <span id="radius-val" class="text-cyan">50</span> meters</label>
+        <input type="range" id="geofence-radius" min="10" max="200" step="5" value="50" oninput="document.getElementById('radius-val').textContent=this.value"/>
+      </div>
+      <div id="gps-status" style="font-size:12.5px;color:#9ca3af;background:rgba(0,0,0,0.2);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);line-height:1.4;">
+        📡 App will request your current browser GPS coordinates when starting the session.
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:20px;" onclick="startSession()">Start Live Session</button>
+  </div>
+
+  <!-- Live QR display -->
+  <div id="session-card" style="display:none;">
+    <div class="card" style="text-align:center;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;font-weight:600;" id="session-subject"></div>
+          <div style="font-size:12px;color:#718096;">Show this screen to students</div>
+        </div>
+        <button onclick="stopSession()" class="btn" style="background:#c53030;color:#fff;">Stop Session</button>
+      </div>
+
+      <!-- Countdown bar -->
+      <div style="background:#e2e8f0;border-radius:99px;height:8px;margin-bottom:12px;">
+        <div id="countdown-bar" style="background:#2b3a8f;height:8px;border-radius:99px;transition:width 1s linear;width:100%;"></div>
+      </div>
+      <div style="font-size:13px;color:#718096;margin-bottom:16px;">
+        QR refreshes in <span id="countdown-num" style="font-weight:600;color:#2b3a8f;">30</span>s
+      </div>
+
+      <!-- QR Code -->
+      <div id="qr-container" style="display:inline-block;padding:24px;background:#fff;border:6px solid #000;border-radius:4px;margin-bottom:16px;"></div>
+
+      <div style="margin-bottom:14px;">
+        <button onclick="openFullscreen()" class="btn btn-green">🔍 Fullscreen (easier to scan)</button>
+      </div>
+
+      <div style="font-size:12px;color:#718096;">
+        Session token changes every <span id="interval-display"></span> seconds — screenshots won't work
+      </div>
+    </div>
+
+    <!-- Students who marked attendance this session -->
+    <div class="card">
+      <h2 style="font-size:16px;margin-bottom:12px;">Marked This Session</h2>
+      <table>
+        <thead><tr><th>Time</th><th>SRN</th><th>Name</th><th>Status</th></tr></thead>
+        <tbody id="session-log">
+          <tr><td colspan="4" style="text-align:center;color:#718096;">Waiting for students...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  // API is already declared in auth.js — do NOT redeclare it here
+  let sessionInterval = null;
+  let countdownInterval = null;
+  let currentToken = null;
+  let secondsLeft = 30;
+  let maxSeconds = 30;
+  let currentSubject = "";
+  let sessionLog = [];
+
+  let currentLat = null;
+  let currentLon = null;
+  let currentRadius = 50;
+
+  const PRESETS = {
+    seminar: { lat: 12.9349, lon: 77.5348, label: "CS Seminar Hall" },
+    lab: { lat: 12.9345, lon: 77.5342, label: "Main Block Lab 202" },
+    class: { lat: 12.9351, lon: 77.5355, label: "Classroom 101" }
+  };
+
+  function toggleLocationFields() {
+    const val = document.getElementById("location-preset").value;
+    const radCont = document.getElementById("radius-container");
+    const gpsStatus = document.getElementById("gps-status");
+    
+    gpsStatus.style.display = "block";
+    if (val === "none") {
+      radCont.style.display = "none";
+      gpsStatus.innerHTML = "💡 <strong>Presentation Mode:</strong> Geofencing disabled. Students can check-in from anywhere.";
+    } else {
+      radCont.style.display = "block";
+      if (val === "current") {
+        gpsStatus.innerHTML = "📡 App will request your current browser GPS coordinates when starting the session.";
+      } else {
+        const p = PRESETS[val];
+        gpsStatus.innerHTML = `📍 <strong>Preset location loaded:</strong> Lat <strong>${p.lat}</strong>, Lon <strong>${p.lon}</strong> (${p.label}).`;
+      }
+    }
+  }
+
+  function generateToken(subject, intervalSecs) {
+    // Token = subject + current time slot (changes every intervalSecs)
+    const slot = Math.floor(Date.now() / (intervalSecs * 1000));
+    return btoa(`${subject}::${slot}::ATTENDANCE`);
+  }
+
+  function renderQR(token) {
+    const container = document.getElementById("qr-container");
+    container.innerHTML = "";
+    
+    // Construct clickable dynamic check-in link for mobile scanners!
+    const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+    const checkinUrl = `${window.location.origin}${basePath}/studentscan.html?token=${encodeURIComponent(token)}&subject=${encodeURIComponent(currentSubject)}`;
+    
+    new QRCode(container, {
+      text: checkinUrl,
+      width: 280,
+      height: 280,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  function updateCountdown() {
+    secondsLeft--;
+    document.getElementById("countdown-num").textContent = secondsLeft;
+    const pct = (secondsLeft / maxSeconds) * 100;
+    document.getElementById("countdown-bar").style.width = pct + "%";
+
+    // Change bar color as time runs out
+    const bar = document.getElementById("countdown-bar");
+    if (secondsLeft <= 5)       bar.style.background = "#ef4444";
+    else if (secondsLeft <= 10) bar.style.background = "#f59e0b";
+    else                        bar.style.background = "linear-gradient(90deg, #06b6d4, #8b5cf6)";
+
+    if (secondsLeft <= 0) {
+      secondsLeft = maxSeconds;
+      refreshQR();
+    }
+  }
+
+  function refreshQR() {
+    currentToken = generateToken(currentSubject, maxSeconds);
+    renderQR(currentToken);
+    // Update fullscreen overlay if it's open
+    if (document.getElementById("fs-overlay").style.display === "flex") {
+      openFullscreen();
+    }
+    // Notify backend about new token (best-effort)
+    fetch(`${API}/session/token`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        token: currentToken, 
+        subject: currentSubject,
+        latitude: currentLat,
+        longitude: currentLon,
+        radius: currentRadius
+      })
+    }).catch(() => console.warn("Could not notify backend of new token"));
+  }
+
+  async function startSession() {
+    const subject   = document.getElementById("subject").value;
+    const interval  = parseInt(document.getElementById("interval").value);
+    const locPreset = document.getElementById("location-preset").value;
+    const radiusVal = parseInt(document.getElementById("geofence-radius").value);
+
+    if (!subject) { alert("Please select a subject."); return; }
+
+    currentSubject = subject;
+    maxSeconds     = interval;
+    secondsLeft    = interval;
+    currentRadius  = radiusVal;
+
+    const startBtn = document.querySelector(".btn-primary");
+    const origBtnText = startBtn.textContent;
+
+    if (locPreset === "none") {
+      currentLat = null;
+      currentLon = null;
+      launchSession();
+    } else if (locPreset === "current") {
+      startBtn.disabled = true;
+      startBtn.innerHTML = "<div class='spinner'></div> Fetching current GPS location...";
+      
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          currentLat = pos.coords.latitude;
+          currentLon = pos.coords.longitude;
+          startBtn.disabled = false;
+          startBtn.textContent = origBtnText;
+          launchSession();
+        },
+        (err) => {
+          startBtn.disabled = false;
+          startBtn.textContent = origBtnText;
+          alert("Error fetching device coordinates: " + err.message + "\n\nTip: Select a preset location or disable geofencing (Presentation Mode) to run the demo.");
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else {
+      const preset = PRESETS[locPreset];
+      currentLat = preset.lat;
+      currentLon = preset.lon;
+      launchSession();
+    }
+  }
+
+  function launchSession() {
+    document.getElementById("setup-card").style.display   = "none";
+    document.getElementById("session-card").style.display = "block";
+    document.getElementById("session-subject").textContent = currentSubject;
+    document.getElementById("interval-display").textContent = maxSeconds;
+    document.getElementById("fs-subject-label").textContent = "📡 " + currentSubject;
+    
+    // Clean old geofence text if stopsession/restartsession happens
+    const oldInfo = document.getElementById("session-geofence-info");
+    if (oldInfo) oldInfo.remove();
+
+    // Display visual geofence info on active screen
+    const infoEl = document.createElement("div");
+    infoEl.id = "session-geofence-info";
+    infoEl.style.fontSize = "13px";
+    infoEl.style.color = "#9ca3af";
+    infoEl.style.marginBottom = "18px";
+    infoEl.style.background = "rgba(255, 255, 255, 0.03)";
+    infoEl.style.padding = "8px 12px";
+    infoEl.style.borderRadius = "6px";
+    infoEl.style.border = "1px solid rgba(255, 255, 255, 0.04)";
+    infoEl.style.display = "inline-block";
+    
+    if (currentLat !== null && currentLon !== null) {
+      infoEl.innerHTML = `📍 Geofence: Lat <strong>${currentLat.toFixed(5)}</strong>, Lon <strong>${currentLon.toFixed(5)}</strong> | Radius: <strong class="text-cyan">${currentRadius}m</strong>`;
+    } else {
+      infoEl.innerHTML = `🌐 Geofence Disabled (Presentation Mode)`;
+    }
+    
+    const cardBody = document.getElementById("session-card").firstElementChild;
+    const countdownContainer = cardBody.querySelector(".btn-green").parentElement;
+    cardBody.insertBefore(infoEl, countdownContainer);
+
+    refreshQR();
+
+    countdownInterval = setInterval(updateCountdown, 1000);
+
+    // Poll for new attendance marks every 3 seconds
+    sessionInterval = setInterval(pollAttendance, 3000);
+  }
+
+  function stopSession() {
+    clearInterval(sessionInterval);
+    clearInterval(countdownInterval);
+    const oldInfo = document.getElementById("session-geofence-info");
+    if (oldInfo) oldInfo.remove();
+    document.getElementById("setup-card").style.display   = "block";
+    document.getElementById("session-card").style.display = "none";
+    sessionLog = [];
+  }
+
+  async function pollAttendance() {
+    let data;
+    try {
+      const res = await fetch(`${API}/session/marked?subject=${encodeURIComponent(currentSubject)}`,
+                              { credentials: "include" });
+      data = await res.json();
+    } catch (e) {
+      console.warn("Poll failed — is Flask running?", e);
+      return;
+    }
+    if (!data.success) return;
+
+    sessionLog = data.records;
+    const tbody = document.getElementById("session-log");
+    if (!sessionLog.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#718096;">Waiting for students...</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = sessionLog.map(r => `
+      <tr>
+        <td>${new Date(r.timestamp * 1000).toLocaleTimeString()}</td>
+        <td>${r.srn}</td>
+        <td>${r.name}</td>
+        <td><span class="badge badge-green">Present</span></td>
+      </tr>
+    `).join("");
+  }
+
+  function openFullscreen() {
+    if (!currentToken) return;
+    const overlay = document.getElementById("fs-overlay");
+    const fsContainer = document.getElementById("fs-qr");
+    fsContainer.innerHTML = "";
+    
+    // Construct clickable check-in link for fullscreen view
+    const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+    const checkinUrl = `${window.location.origin}${basePath}/studentscan.html?token=${encodeURIComponent(currentToken)}&subject=${encodeURIComponent(currentSubject)}`;
+    
+    new QRCode(fsContainer, {
+      text: checkinUrl,
+      width: Math.min(window.innerWidth - 80, 400),
+      height: Math.min(window.innerWidth - 80, 400),
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    overlay.style.display = "flex";
+  }
+
+  function closeFullscreen() {
+    document.getElementById("fs-overlay").style.display = "none";
+  }
+
+  // Keep fullscreen QR in sync when it refreshes
+  const _origRefreshQR = refreshQR;
+
+  // Initialize UI presets display on load
+  toggleLocationFields();
+</script>
+
+<!-- Fullscreen QR Overlay -->
+<div id="fs-overlay" onclick="closeFullscreen()" style="
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+  z-index:9999; align-items:center; justify-content:center; flex-direction:column; gap:20px;">
+  <div style="background:#fff;padding:32px;border-radius:12px;text-align:center;" onclick="event.stopPropagation()">
+    <div style="font-size:14px;color:#4a5568;margin-bottom:16px;font-weight:600;" id="fs-subject-label"></div>
+    <div id="fs-qr"></div>
+    <div style="font-size:12px;color:#718096;margin-top:14px;">QR auto-refreshes • Point camera at this</div>
+    <button onclick="closeFullscreen()" class="btn" style="background:#e2e8f0;color:#4a5568;margin-top:16px;width:100%;">✕ Close</button>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blockchain Attendance System</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="index.html">⛓ Blockchain Attendance</a>
+  <a href="register.html">Register</a>
+  <a href="session.html">Live Session</a>
+  <a href="attendance.html">Mark Attendance</a>
+  <a href="report.html">Reports</a>
+  <a href="studentscan.html" style="color:#9fe1cb;">Student Scan</a>
+  <span id="teacher-name" style="color:#c3cfff;font-size:13px;margin-left:auto;"></span>
+  <button onclick="logout()" class="btn" style="background:#c53030;color:#fff;padding:6px 14px;font-size:13px;margin-left:12px;">Logout</button>
+</nav>
+
+<div class="container">
+  <h1>Dashboard</h1>
+
+  <!-- Blockchain status cards -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num" id="total-students">—</div>
+      <div class="lbl">Registered Students</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="block-num">—</div>
+      <div class="lbl">Latest Block</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="chain-status">—</div>
+      <div class="lbl">Blockchain Status</div>
+    </div>
+  </div>
+
+  <!-- Quick action cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;">
+
+    <div class="card" style="cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .3s ease;"
+         onmouseover="this.style.borderColor='rgba(139, 92, 246, 0.4)'; this.style.boxShadow='0 0 25px rgba(139, 92, 246, 0.2)'; this.style.transform='translateY(-3px)';" 
+         onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.06)'; this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="window.location.href='register.html'">
+      <div style="font-size:32px;margin-bottom:12px;">📋</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#fff;">Register Student</div>
+      <div style="font-size:12.5px;color:#9ca3af;line-height:1.4;">Add students to blockchain and generate QR codes</div>
+    </div>
+
+    <div class="card" style="cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .3s ease;"
+         onmouseover="this.style.borderColor='rgba(6, 182, 212, 0.4)'; this.style.boxShadow='0 0 25px rgba(6, 182, 212, 0.2)'; this.style.transform='translateY(-3px)';" 
+         onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.06)'; this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="window.location.href='session.html'">
+      <div style="font-size:32px;margin-bottom:12px;">📡</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#fff;">Live Session QR</div>
+      <div style="font-size:12.5px;color:#9ca3af;line-height:1.4;">Start a class — rotating QR prevents proxy attendance</div>
+    </div>
+
+    <div class="card" style="cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .3s ease;"
+         onmouseover="this.style.borderColor='rgba(139, 92, 246, 0.4)'; this.style.boxShadow='0 0 25px rgba(139, 92, 246, 0.2)'; this.style.transform='translateY(-3px)';" 
+         onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.06)'; this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="window.location.href='attendance.html'">
+      <div style="font-size:32px;margin-bottom:12px;">✅</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#fff;">Mark Attendance</div>
+      <div style="font-size:12.5px;color:#9ca3af;line-height:1.4;">Manually scan QR or enter SRN as teacher</div>
+    </div>
+
+    <div class="card" style="cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .3s ease;"
+         onmouseover="this.style.borderColor='rgba(6, 182, 212, 0.4)'; this.style.boxShadow='0 0 25px rgba(6, 182, 212, 0.2)'; this.style.transform='translateY(-3px)';" 
+         onmouseout="this.style.borderColor='rgba(255, 255, 255, 0.06)'; this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="window.location.href='report.html'">
+      <div style="font-size:32px;margin-bottom:12px;">📊</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#fff;">View Reports</div>
+      <div style="font-size:12.5px;color:#9ca3af;line-height:1.4;">Full attendance history from blockchain</div>
+    </div>
+
+    <div class="card" style="cursor:pointer;border:1px solid rgba(16, 185, 129, 0.2);background:rgba(16, 185, 129, 0.03);transition:all .3s ease;grid-column:1/-1;"
+         onmouseover="this.style.borderColor='rgba(16, 185, 129, 0.5)'; this.style.boxShadow='0 0 25px rgba(16, 185, 129, 0.15)'; this.style.transform='translateY(-3px)';" 
+         onmouseout="this.style.borderColor='rgba(16, 185, 129, 0.2)'; this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="window.location.href='studentscan.html'">
+      <div style="font-size:32px;margin-bottom:12px;">📱</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#34d399;">Student Self-Scan</div>
+      <div style="font-size:13px;color:#9ca3af;line-height:1.5;">
+        Share this page with students — they scan the teacher's rotating QR from their own phone.
+        No login required for students. Includes automated GPS geofencing validation.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Students table -->
+  <div class="card">
+    <h2 style="font-size:16px;margin-bottom:16px;">All Registered Students</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Name</th><th>SRN</th><th>Status</th></tr>
+        </thead>
+        <tbody id="students-body">
+          <tr><td colspan="4" style="text-align:center;color:#9ca3af;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  async function loadDashboard() {
+    const st = await fetch(`${API}/status`, { credentials: "include" }).then(r => r.json());
+    document.getElementById("block-num").textContent    = st.latest_block ?? "—";
+    document.getElementById("chain-status").textContent = st.ganache_connected ? "Connected" : "Offline";
+
+    const data = await fetch(`${API}/students`, { credentials: "include" }).then(r => r.json());
+    document.getElementById("total-students").textContent = data.students.length;
+
+    const tbody = document.getElementById("students-body");
+    if (!data.students.length) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#718096;">No students registered yet</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.students.map((s, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${s.name}</td>
+        <td>${s.srn}</td>
+        <td><span class="badge badge-green">Registered</span></td>
+      </tr>
+    `).join("");
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>
