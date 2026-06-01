@@ -44,7 +44,10 @@ if not w3.is_connected():
     raise Exception("Cannot connect to Ethereum network.")
 
 # ─── Load Contract ─────────────────────────────────────────────────────────────
-with open("contract_abi.json", "r") as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ABI_PATH = os.path.join(BASE_DIR, "contract_abi.json")
+
+with open(ABI_PATH, "r") as f:
     contract_data = json.load(f)
 
 CONTRACT_ADDRESS = CONTRACT_ADDRESS_ENV if CONTRACT_ADDRESS_ENV else contract_data["address"]
@@ -60,7 +63,7 @@ else:
     print(f"[INFO] Using local Ganache owner account: {OWNER_ACCOUNT}")
 
 # ─── Local Database for raw GPS logging and Proxy Audit ────────────────────────
-LOG_FILE = "attendance_gps_log.json"
+LOG_FILE = os.path.join(BASE_DIR, "attendance_gps_log.json")
 
 def log_attendance_record(srn, name, subject, latitude, longitude, status, is_proxy, location_hash):
     records = []
@@ -172,7 +175,8 @@ def send_tx(fn):
     })
     
     signed_tx = w3.eth.account.sign_transaction(built_tx, private_key=OWNER_PRIVATE_KEY)
-    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    raw_tx = getattr(signed_tx, "raw_transaction", getattr(signed_tx, "rawTransaction", None))
+    tx_hash = w3.eth.send_raw_transaction(raw_tx)
     return w3.eth.wait_for_transaction_receipt(tx_hash)
 
 def today():
