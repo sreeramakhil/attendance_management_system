@@ -53,6 +53,18 @@ else:
     w3 = Web3(Web3.HTTPProvider(GANACHE_URL))
 
 if not w3.is_connected():
+    print("[BOOT] [ERROR] Connection test to Ethereum RPC failed.", flush=True)
+    if SEPOLIA_RPC_URL:
+        import urllib.parse
+        import socket
+        try:
+            parsed = urllib.parse.urlparse(SEPOLIA_RPC_URL)
+            print(f"[BOOT] [ERROR] Parsed Hostname: {parsed.hostname}", flush=True)
+            ip = socket.gethostbyname(parsed.hostname)
+            print(f"[BOOT] [ERROR] Successfully resolved IP: {ip}", flush=True)
+        except Exception as dns_err:
+            print(f"[BOOT] [ERROR] DNS Host Resolution failed: {dns_err}", flush=True)
+            print("[BOOT] [TIP] Verify that your SEPOLIA_RPC_URL does not contain typos (e.g. check for missing hyphens like 'eth-sepolia').", flush=True)
     raise Exception("[FATAL] Cannot connect to Ethereum network. Check your RPC URL and network connectivity.")
 
 print("[BOOT] Ethereum connection established successfully!", flush=True)
