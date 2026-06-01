@@ -101,14 +101,34 @@
       { facingMode: "environment" },
       { fps: 10, qrbox: { width: 250, height: 250 } },
       async (decodedText) => {
-        await markAttendance(decodedText.trim().toUpperCase(), "qr-scan-alert");
+        // Immediately stop scanner to prevent duplicate frame capture calls
+        stopScanner();
+        
+        const cleanSrn = decodedText.trim().toUpperCase();
+        showAlert("qr-scan-alert", `⌛ Processing QR Code for ${cleanSrn}...`, "success");
+        
+        await markAttendance(cleanSrn, "qr-scan-alert");
+        
+        // Auto-restart scanner after a brief delay so the teacher can scan the next student
+        setTimeout(() => {
+          const panel = document.getElementById("panel-qr");
+          if (panel && panel.style.display !== "none") {
+            startScanner();
+          }
+        }, 3800);
       },
       () => {}
     ).catch(e => showAlert("qr-scan-alert", "Camera error: " + e, "error"));
   }
 
   function stopScanner() {
-    if (scanner) { scanner.stop().then(() => { scanner = null; }); }
+    if (scanner) {
+      try {
+        scanner.stop().then(() => { scanner = null; }).catch(e => {});
+      } catch(err) {
+        scanner = null;
+      }
+    }
   }
 
   async function markManual() {
@@ -133,17 +153,28 @@
     const subject = document.getElementById("subject").value;
     if (!subject) { showAlert(alertId, "Select a subject first.", "error"); return; }
 
-    const res  = await fetch(`${API}/mark_attendance`, {
-      method: "POST", credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ srn, subject })
-    });
-    const data = await res.json();
-    showAlert(alertId, data.message, data.success ? "success" : "error");
+    try {
+      const res  = await fetch(`${API}/mark_attendance`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ srn, subject })
+      });
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        throw new Error(`Server returned HTML error ${res.status}`);
+      }
+      
+      showAlert(alertId, data.message, data.success ? "success" : "error");
 
-    if (data.success) {
-      log.unshift({ time: new Date().toLocaleTimeString(), srn, subject, by: data.marked_by });
-      renderLog();
+      if (data.success) {
+        log.unshift({ time: new Date().toLocaleTimeString(), srn, subject, by: data.marked_by });
+        renderLog();
+      }
+    } catch (e) {
+      showAlert(alertId, "Error: " + e.message, "error");
     }
   }
 
