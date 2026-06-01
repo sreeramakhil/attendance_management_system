@@ -29,8 +29,16 @@ CORS(app, supports_credentials=True, origins=[
 import os
 
 SEPOLIA_RPC_URL = os.environ.get("SEPOLIA_RPC_URL")
+if SEPOLIA_RPC_URL:
+    SEPOLIA_RPC_URL = SEPOLIA_RPC_URL.strip('"\' ')
+
 CONTRACT_ADDRESS_ENV = os.environ.get("CONTRACT_ADDRESS")
+if CONTRACT_ADDRESS_ENV:
+    CONTRACT_ADDRESS_ENV = CONTRACT_ADDRESS_ENV.strip('"\' ')
+
 OWNER_PRIVATE_KEY = os.environ.get("OWNER_PRIVATE_KEY")
+if OWNER_PRIVATE_KEY:
+    OWNER_PRIVATE_KEY = OWNER_PRIVATE_KEY.strip('"\' ')
 
 if SEPOLIA_RPC_URL:
     w3 = Web3(Web3.HTTPProvider(SEPOLIA_RPC_URL))
