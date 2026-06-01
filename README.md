@@ -4,6 +4,7 @@
 
 [![GitHub repo](https://img.shields.io/badge/GitHub-attendance_management_system-blue?logo=github)](https://github.com/sreeramakhil/attendance_management_system)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-securattend.vercel.app-green)](https://securattend.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 📋 Table of Contents
 
@@ -92,6 +93,7 @@ attendance_management_system/
 ├── config/                   # Configuration files
 ├── Makefile                  # Build automation
 ├── requirements.txt          # Python dependencies
+├── LICENSE                   # MIT License
 └── README.md                 # This file
 ```
 
@@ -272,7 +274,23 @@ Contributions are welcome! Follow these steps:
 
 ## 📄 License
 
-This project is currently unlicensed. See the LICENSE file for more details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### MIT License Summary
+✅ **You can:**
+- Use commercially
+- Modify the code
+- Distribute freely
+- Use privately
+
+❌ **You cannot:**
+- Claim liability
+- Hold the author responsible
+
+📋 **You must:**
+- Include the original license and copyright notice
+
+For full license text, see the [LICENSE](LICENSE) file.
 
 ## © Copyright
 
@@ -289,18 +307,17 @@ This project and all its contents, including but not limited to:
 
 are the intellectual property of **Sreeram Akhil** unless otherwise stated.
 
-### Permitted Uses
+### Permitted Uses Under MIT License
 - ✅ Viewing and studying the code for educational purposes
-- ✅ Forking and modifying for personal use
+- ✅ Forking and modifying for personal or commercial use
 - ✅ Creating pull requests to contribute improvements
-- ✅ Using the application for non-commercial purposes
+- ✅ Using the application for any purpose (with attribution)
+- ✅ Redistributing with proper license notice
 
 ### Restricted Uses
-- ❌ Redistribution without attribution
-- ❌ Commercial use without explicit permission
 - ❌ Removing or altering copyright notices
-- ❌ Claiming ownership of the project or its components
-- ❌ Publishing modified versions as your own
+- ❌ Using without including the MIT License notice
+- ❌ Claiming the original work as your own
 
 ### Third-Party Components
 
@@ -315,9 +332,9 @@ Each third-party component is governed by its respective license. Please refer t
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-### Contact for Licensing
+### Contact for Licensing Questions
 
-For inquiries regarding commercial use, licensing agreements, or other copyright-related matters, please contact:
+For inquiries regarding licensing, attribution, or other copyright-related matters, please contact:
 
 **Email**: akhilsreeram663@gmail.com  
 **GitHub**: [@sreeramakhil](https://github.com/sreeramakhil)
