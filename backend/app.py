@@ -195,15 +195,27 @@ def login_required(f):
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 import threading
 tx_lock = threading.Lock()
+owner_nonce = None
 
 def send_tx(fn):
+    global owner_nonce
     with tx_lock:
         if not OWNER_PRIVATE_KEY:
             tx_hash = fn.transact({"from": OWNER_ACCOUNT, "gas": 300000})
             return w3.eth.wait_for_transaction_receipt(tx_hash)
         
-        # Public network signed transaction execution
-        nonce = w3.eth.get_transaction_count(OWNER_ACCOUNT)
+        # Instant Public network signed transaction execution with in-memory nonce tracking
+        if owner_nonce is None:
+            owner_nonce = w3.eth.get_transaction_count(OWNER_ACCOUNT)
+            print(f"[BOOT] Initialized Sepolia nonce from blockchain: {owner_nonce}", flush=True)
+        else:
+            # Sync nonce if blockchain has advanced further externally
+            blockchain_nonce = w3.eth.get_transaction_count(OWNER_ACCOUNT)
+            if blockchain_nonce > owner_nonce:
+                owner_nonce = blockchain_nonce
+                print(f"[BOOT] Nonce synced to blockchain progress: {owner_nonce}", flush=True)
+        
+        nonce = owner_nonce
         built_tx = fn.build_transaction({
             'from': OWNER_ACCOUNT,
             'gas': 300000,
@@ -214,7 +226,13 @@ def send_tx(fn):
         signed_tx = w3.eth.account.sign_transaction(built_tx, private_key=OWNER_PRIVATE_KEY)
         raw_tx = getattr(signed_tx, "raw_transaction", getattr(signed_tx, "rawTransaction", None))
         tx_hash = w3.eth.send_raw_transaction(raw_tx)
-        return w3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        # Increment local nonce tracker so subsequent requests can go out instantly!
+        owner_nonce += 1
+        print(f"[TX] Broadcasted tx {tx_hash.hex()[:10]}... with nonce {nonce}. Local nonce advanced to {owner_nonce}.", flush=True)
+        
+        # Return instantly. Do not wait for mining receipt!
+        return tx_hash.hex()
 
 def today():
     return datetime.now().strftime("%Y-%m-%d")
