@@ -1,357 +1,454 @@
-# Attendance Management System
+# 🔐 SecureAttend - Blockchain Attendance Management System
 
-> A comprehensive full-stack attendance management solution combining modern web technologies with blockchain integration for secure and transparent record-keeping.
+<div align="center">
 
-[![GitHub repo](https://img.shields.io/badge/GitHub-attendance_management_system-blue?logo=github)](https://github.com/sreeramakhil/attendance_management_system)
-[![Live Demo](https://img.shields.io/badge/Live_Demo-securattend.vercel.app-green)](https://securattend.vercel.app)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+**Enterprise-grade attendance management combining modern web technologies with blockchain integration for secure, transparent, and immutable record-keeping.**
+
+[![GitHub repo](https://img.shields.io/badge/GitHub-SecureAttend-blue?style=flat-square&logo=github)](https://github.com/sreeramakhil/securattend)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-securattend.vercel.app-brightgreen?style=flat-square&logo=vercel)](https://securattend.vercel.app)
+[![Python](https://img.shields.io/badge/Python-29.1%25-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Solidity](https://img.shields.io/badge/Solidity-4.1%25-363636?style=flat-square&logo=ethereum&logoColor=white)](https://soliditylang.org/)
+[![Web3](https://img.shields.io/badge/Web3.js-Smart%20Contracts-F16822?style=flat-square&logo=web3.js&logoColor=white)](https://web3js.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
+**[🎬 Live Demo](https://securattend.vercel.app) • [📖 Documentation](#-documentation) • [🚀 Quick Start](#-quick-start) • [🔗 Smart Contracts](#-smart-contracts)**
+
+</div>
+
+---
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Running Locally](#running-locally)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Architecture](#architecture)
-- [Smart Contracts](#smart-contracts)
-- [Contributing](#contributing)
-- [License](#license)
-- [Copyright](#copyright)
-- [Contact](#contact)
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Architecture](#-system-architecture)
+- [Quick Start](#-quick-start)
+- [Project Structure](#-project-structure)
+- [Smart Contracts](#-smart-contracts)
+- [API Documentation](#-api-documentation)
+- [Deployment](#-deployment)
+- [Security Features](#-security-features)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
 
 ## 🎯 Overview
 
-The **Attendance Management System** is a robust application designed to streamline attendance tracking and management. It leverages a modern full-stack architecture combining:
+**SecureAttend** is a production-ready, full-stack attendance management system that reimagines record-keeping through blockchain technology. Unlike traditional attendance systems, SecureAttend provides:
 
-- **Frontend**: Interactive web interfaces built with HTML, CSS, and JavaScript
-- **Backend**: Python-powered REST APIs for business logic and data management
-- **Blockchain**: Solidity smart contracts for immutable attendance records
+- **Immutable Records**: Every attendance entry is cryptographically secured on the blockchain
+- **Transparency**: All records are publicly verifiable and tamper-proof
+- **Real-Time Tracking**: Instant attendance updates across all users
+- **Enterprise-Scale**: Built to handle institutional and corporate attendance needs
+- **Multi-Layer Architecture**: Decoupled frontend, backend, and blockchain layers
 
-The system is deployed and accessible at [securattend.vercel.app](https://securattend.vercel.app), providing secure, transparent, and efficient attendance management.
+### Why SecureAttend?
 
-## ✨ Features
+| Traditional Systems | SecureAttend |
+|-------------------|-------------|
+| Centralized database (prone to tampering) | Blockchain-backed (immutable) |
+| Manual record auditing | Automated smart contract verification |
+| Single point of failure | Distributed architecture |
+| Limited transparency | Complete audit trail |
+| No cryptographic proof | Blockchain-verified authenticity |
 
-### Core Functionality
-- 📱 **Responsive User Interface** - Clean, intuitive web interface for both administrators and users
-- 🔐 **Secure Authentication** - User authentication and authorization mechanisms
-- 📊 **Attendance Tracking** - Real-time attendance recording and monitoring
-- 📈 **Analytics & Reports** - Comprehensive reporting and data visualization
-- 🔗 **Blockchain Integration** - Immutable attendance records on the blockchain
-- 📋 **Batch Processing** - Support for bulk attendance operations
+**🎬 [Try the Live Demo](https://securattend.vercel.app)**
 
-### Advanced Features
-- ✅ Attendance verification and validation
-- 📅 Calendar-based attendance view
-- 👥 User and role management
-- 🔔 Notifications and alerts
-- 📥 Data import/export functionality
+---
+
+## ✨ Key Features
+
+### 🔐 **Security & Verification**
+- **Blockchain Verification**: All attendance records stored on Ethereum/Polygon smart contracts
+- **Immutable Records**: Cryptographically secured, tamper-proof attendance logs
+- **JWT Authentication**: Secure token-based user authentication
+- **Role-Based Access Control**: Admin, Instructor, and User roles with granular permissions
+- **Data Encryption**: Sensitive data encrypted at rest and in transit
+
+### 📊 **Attendance Management**
+- **Real-Time Recording**: Instant check-in/check-out with timestamp verification
+- **Batch Processing**: Bulk attendance operations for large institutions
+- **Attendance Verification**: Smart contract validation of attendance authenticity
+- **Calendar View**: Visual calendar-based attendance overview
+- **Manual Adjustments**: Authorized personnel can modify records with audit trail
+
+### 📈 **Analytics & Reports**
+- **Comprehensive Dashboard**: Real-time attendance metrics and KPIs
+- **Detailed Reports**: Generate attendance summaries by user, date range, department
+- **Trend Analysis**: Visualize attendance patterns and anomalies
+- **Export Functionality**: Download reports in CSV/PDF format
+- **Statistical Insights**: Attendance rate, absenteeism patterns, peak hours
+
+### 👥 **User Management**
+- **Multi-User Support**: Support for students, employees, instructors, admins
+- **User Profiles**: Detailed user information and role assignments
+- **Bulk Import**: CSV upload for batch user creation
+- **Department Management**: Organize users by departments/classes
+- **Activity Logs**: Complete audit trail of all user actions
+
+### 🔔 **Notifications & Alerts**
+- **Real-Time Notifications**: Instant alerts for attendance events
+- **Absence Alerts**: Automatic notifications for unauthorized absences
+- **System Alerts**: Dashboard alerts for system events and updates
+- **Email Integration**: Optional email notifications for admins
+
+### 📱 **Responsive Interface**
+- **Mobile-Friendly UI**: Works seamlessly on desktop, tablet, and mobile
+- **Intuitive Dashboard**: Clean, modern interface designed for ease of use
+- **Dark Mode Support**: Eye-friendly dark theme option
+- **Fast Load Times**: Optimized for speed and performance
+
+---
 
 ## 🛠️ Tech Stack
 
-### Frontend (52.5% - HTML)
-- **HTML5** - Semantic markup and structure
-- **CSS (9.4%)** - Responsive styling and layout
-- **JavaScript (1.9%)** - Interactive frontend logic and DOM manipulation
+### Frontend Layer (52.5%)
+- **HTML5**: Semantic markup and structure
+- **CSS3**: Responsive design, animations, styling
+- **JavaScript (ES6+)**: Interactive features, DOM manipulation, API calls
+- **Fetch API**: RESTful API communication
 
-### Backend (29.1% - Python)
-- **Python** - Core backend logic and API development
-- **Framework**: Flask/Django (or similar Python web framework)
-- **Database**: Integration with relational databases
+### Backend Layer (29.1%)
+- **Python 3.8+**: Core backend logic
+- **Flask/Django**: Web framework for REST APIs
+- **SQLAlchemy**: ORM for database management
+- **PostgreSQL/SQLite**: Relational database
+- **JWT (PyJWT)**: Authentication token management
+- **Web3.py**: Blockchain interaction
 
-### Blockchain (4.1% - Solidity)
-- **Solidity** - Smart contracts for immutable attendance recording
-- **Ethereum/Compatible Chain** - Blockchain network integration
+### Blockchain Layer (4.1%)
+- **Solidity 0.8+**: Smart contract development
+- **Ethereum/Polygon**: Blockchain network
+- **Web3.js**: JavaScript blockchain interactions
+- **Truffle/Hardhat**: Smart contract development framework
+- **OpenZeppelin Contracts**: Secure smart contract libraries
 
-### Build & Deployment
-- **Makefile (1.4%)** - Build automation
-- **Batchfile (1.6%)** - Windows batch scripts for automation
-- **Vercel** - Frontend hosting and deployment
+### Infrastructure & Deployment
+- **Vercel**: Frontend hosting and deployment
+- **Docker**: Containerization for consistency
+- **GitHub Actions**: CI/CD pipeline automation
+- **Makefile**: Build automation and task runners
+
+---
+
+## 🏗️ System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SECURATTEND ECOSYSTEM                    │
+└─────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│   Frontend Layer (HTML/CSS/JavaScript)               │
+│   • Responsive Dashboard                             │
+│   • Real-Time Updates                                │
+│   • Web3 Integration                                 │
+└────────────────────┬─────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────┐
+│   REST API Layer (Python Flask)                      │
+│   • Authentication & Authorization                   │
+│   • Business Logic                                   │
+│   • Data Processing                                  │
+└────────────┬──────────────────────────┬──────────────┘
+             │                          │
+             ▼                          ▼
+    ┌────────────────┐          ┌──────────────────┐
+    │   SQL Database │          │   Blockchain     │
+    │   (PostgreSQL) │          │   Network        │
+    └────────────────┘          │ (Ethereum/       │
+                                │  Polygon)        │
+                                └──────────────────┘
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+```bash
+✓ Python 3.8 or higher
+✓ Node.js 14+ (for blockchain interaction)
+✓ Git
+✓ npm or yarn
+✓ MetaMask browser extension
+```
+
+### Installation
+
+#### Step 1: Clone Repository
+```bash
+git clone https://github.com/sreeramakhil/securattend.git
+cd securattend
+```
+
+#### Step 2: Set Up Backend
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate it
+source venv/bin/activate  # macOS/Linux
+# or
+venv\Scripts\activate      # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+#### Step 3: Configure Environment
+```bash
+cp .env.example .env
+# Edit .env with your settings
+```
+
+#### Step 4: Run Application
+```bash
+# Terminal 1: Start backend
+python app.py
+
+# Terminal 2: Open frontend
+cd frontend
+python -m http.server 8000
+```
+
+**Access**: http://localhost:8000
+
+---
 
 ## 📁 Project Structure
 
 ```
-attendance_management_system/
-├── frontend/                  # HTML, CSS, JavaScript files
-│   ├── index.html
+securattend/
+├── frontend/                          # Frontend application
+│   ├── index.html                     # Login page
+│   ├── dashboard.html                 # Main dashboard
+│   ├── admin.html                     # Admin panel
+│   ├── reports.html                   # Reports page
 │   ├── styles/
-│   │   └── *.css
-│   └── scripts/
-│       └── *.js
-├── backend/                   # Python backend
-│   ├── app.py                # Main application entry
-│   ├── routes/               # API endpoints
-│   ├── models/               # Data models
-│   └── utils/                # Utility functions
-├── contracts/                # Solidity smart contracts
-│   └── Attendance.sol
-├── config/                   # Configuration files
-├── Makefile                  # Build automation
-├── requirements.txt          # Python dependencies
-├── LICENSE                   # MIT License
-└── README.md                 # This file
+│   │   ├── style.css
+│   │   ├── dashboard.css
+│   │   └── responsive.css
+│   ├── scripts/
+│   │   ├── app.js
+│   │   ├── api.js
+│   │   ├── auth.js
+│   │   └── web3.js
+│   └── assets/
+│
+├── backend/                           # Backend application
+│   ├── app.py                         # Flask app
+│   ├── routes/
+│   │   ├── auth.py
+│   │   ├── attendance.py
+│   │   ├── reports.py
+│   │   └── admin.py
+│   ├── models/
+│   │   ├── user.py
+│   │   ├── attendance.py
+│   │   └── department.py
+│   ├── services/
+│   │   ├── blockchain_service.py
+│   │   ├── attendance_service.py
+│   │   └── report_service.py
+│   └── requirements.txt
+│
+├── blockchain/                        # Smart contracts
+│   ├── contracts/
+│   │   ├── Attendance.sol
+│   │   └── AccessControl.sol
+│   ├── scripts/
+│   │   └── deploy.js
+│   ├── test/
+│   │   └── Attendance.test.js
+│   └── hardhat.config.js
+│
+├── .env.example
+├── Makefile
+├── LICENSE
+└── README.md
 ```
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Python 3.8+** - For backend development
-- **Node.js & npm** - For JavaScript tooling (optional)
-- **Git** - For version control
-- **Web Browser** - Modern browser (Chrome, Firefox, Safari, Edge)
-- **MetaMask** - For blockchain interaction (if using blockchain features)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/sreeramakhil/attendance_management_system.git
-   cd attendance_management_system
-   ```
-
-2. **Set up Python virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Python dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Install additional dependencies** (if using npm)
-   ```bash
-   npm install
-   ```
-
-### Running Locally
-
-1. **Start the backend server**
-   ```bash
-   python app.py
-   # or
-   make run
-   ```
-   The backend will be available at `http://localhost:5000`
-
-2. **Open the frontend**
-   - Navigate to `http://localhost:5000` in your web browser
-   - Or open `frontend/index.html` directly if running frontend separately
-
-3. **Access the application**
-   - Open [http://localhost:5000](http://localhost:5000)
-   - Log in with your credentials
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-# Flask Configuration
-FLASK_ENV=development
-FLASK_APP=app.py
-SECRET_KEY=your-secret-key-here
-
-# Database Configuration
-DATABASE_URL=sqlite:///attendance.db
-# or for PostgreSQL:
-# DATABASE_URL=postgresql://user:password@localhost/attendance_db
-
-# Blockchain Configuration
-CONTRACT_ADDRESS=0x...
-WEB3_PROVIDER=https://mainnet.infura.io/v3/YOUR-PROJECT-ID
-PRIVATE_KEY=your-private-key
-
-# Application Settings
-DEBUG=True
-LOG_LEVEL=INFO
-```
-
-### Database Setup
-
-```bash
-# Initialize the database
-python -c "from app import db; db.create_all()"
-
-# Or using migration tools
-flask db upgrade
-```
-
-## 📖 Usage
-
-### For Administrators
-1. Log in with admin credentials
-2. Navigate to the Admin Dashboard
-3. Add users and manage attendance records
-4. View analytics and generate reports
-5. Configure system settings
-
-### For Users
-1. Log in with your credentials
-2. View your attendance records
-3. Check-in/Check-out if applicable
-4. Download attendance reports
-5. View attendance history
-
-### API Endpoints
-
-#### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `POST /api/auth/register` - User registration
-
-#### Attendance
-- `GET /api/attendance` - Fetch attendance records
-- `POST /api/attendance` - Create attendance record
-- `GET /api/attendance/:id` - Fetch specific record
-- `PUT /api/attendance/:id` - Update attendance record
-- `DELETE /api/attendance/:id` - Delete attendance record
-
-#### Reports
-- `GET /api/reports` - Generate reports
-- `GET /api/reports/summary` - Attendance summary
-
-## 🏗️ Architecture
-
-### System Architecture
-```
-┌─────────────────────────────────────────┐
-│          Frontend Layer                 │
-│  (HTML5 | CSS | JavaScript)            │
-└──────────────┬──────────────────────────┘
-               │
-┌──────────────▼──────────────────────────┐
-│          REST API Layer                 │
-│  (Python Flask/Django)                 │
-└──────────────┬──────────────────────────┘
-               │
-       ┌───────┴────────┐
-       │                │
-┌──────▼──────┐   ┌────▼─────────┐
-│  Database   │   │  Blockchain  │
-│  (SQL)      │   │  (Solidity)  │
-└─────────────┘   └──────────────┘
-```
+---
 
 ## 🔗 Smart Contracts
 
-### Attendance Contract (Solidity)
+### Core Contract Functions
 
-The smart contract manages immutable attendance records on the blockchain:
+```solidity
+// Record attendance on blockchain
+recordAttendance(address _user, uint256 _timestamp, bool _isPresent)
 
-- **Record Attendance**: Securely record attendance on-chain
-- **Verify Records**: Query and verify attendance history
-- **Transparency**: All records are publicly verifiable
-- **Immutability**: Records cannot be altered once recorded
+// Verify attendance authenticity
+verifyAttendance(address _user, uint256 _timestamp) → bool
 
-Deploy with:
-```bash
-truffle migrate
-# or
-hardhat run scripts/deploy.js
+// Get attendance history
+getAttendanceHistory(address _user) → AttendanceRecord[]
+
+// Get attendance count
+getAttendanceCount(address _user, uint256 _start, uint256 _end) → uint256
 ```
 
-## 📝 Contributing
+### Deploy Smart Contracts
 
-Contributions are welcome! Follow these steps:
+```bash
+cd blockchain
+npm install
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+# Configure your network in hardhat.config.js
+
+# Deploy to Polygon
+npx hardhat run scripts/deploy.js --network polygon
+
+# Verify on Etherscan
+npx hardhat verify --network polygon CONTRACT_ADDRESS
+```
+
+---
+
+## 📚 API Documentation
+
+### Base URL
+```
+http://localhost:5000/api
+```
+
+### Authentication
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+### Key Endpoints
+
+#### Register User
+```bash
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "student"
+}
+```
+
+#### Login
+```bash
+POST /api/auth/login
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+```
+
+#### Record Attendance
+```bash
+POST /api/attendance/checkin
+Authorization: Bearer TOKEN
+
+{
+  "userId": "user_123",
+  "timestamp": 1718865600000,
+  "location": "Building A, Room 101"
+}
+```
+
+#### Get Attendance Records
+```bash
+GET /api/attendance?userId=user_123&startDate=2026-06-01&endDate=2026-06-30
+Authorization: Bearer TOKEN
+```
+
+#### Generate Report
+```bash
+POST /api/reports/generate
+Authorization: Bearer TOKEN
+
+{
+  "reportType": "attendance_summary",
+  "startDate": "2026-06-01",
+  "endDate": "2026-06-30",
+  "format": "pdf"
+}
+```
+
+---
+
+## 🚀 Deployment
+
+### Deploy Frontend to Vercel
+
+```bash
+npm install -g vercel
+vercel --prod
+```
+
+### Deploy Backend to Heroku
+
+```bash
+heroku login
+heroku create securattend-api
+git push heroku main
+```
+
+### Docker Deployment
+
+```bash
+docker build -t securattend:latest .
+docker run -p 5000:5000 securattend:latest
+```
+
+---
+
+## 🔐 Security Features
+
+- ✅ **JWT Authentication**: Stateless token-based auth
+- ✅ **Role-Based Access Control**: Granular permissions
+- ✅ **Password Hashing**: bcrypt with salt
+- ✅ **Input Validation**: Sanitized inputs
+- ✅ **HTTPS/TLS**: Encrypted data transmission
+- ✅ **Rate Limiting**: Prevent brute force attacks
+- ✅ **Smart Contract Audits**: Secure contracts
+- ✅ **Audit Logging**: Track all actions
+
+---
+
+## 🤝 Contributing
+
+1. **Fork the repository**
+2. **Create feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit changes**: `git commit -m 'Add amazing feature'`
+4. **Push to branch**: `git push origin feature/amazing-feature`
+5. **Open Pull Request**
+
+---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-### MIT License Summary
-✅ **You can:**
-- Use commercially
-- Modify the code
-- Distribute freely
-- Use privately
-
-❌ **You cannot:**
-- Claim liability
-- Hold the author responsible
-
-📋 **You must:**
-- Include the original license and copyright notice
-
-For full license text, see the [LICENSE](LICENSE) file.
-
-## © Copyright
-
-**Copyright © 2026 Sreeram Akhil. All rights reserved.**
-
-This project and all its contents, including but not limited to:
-- Source code
-- Documentation
-- Images and graphics
-- Design and layout
-- Smart contracts
-- Database schemas
-- API specifications
-
-are the intellectual property of **Sreeram Akhil** unless otherwise stated.
-
-### Permitted Uses Under MIT License
-- ✅ Viewing and studying the code for educational purposes
-- ✅ Forking and modifying for personal or commercial use
-- ✅ Creating pull requests to contribute improvements
-- ✅ Using the application for any purpose (with attribution)
-- ✅ Redistributing with proper license notice
-
-### Restricted Uses
-- ❌ Removing or altering copyright notices
-- ❌ Using without including the MIT License notice
-- ❌ Claiming the original work as your own
-
-### Third-Party Components
-
-This project uses the following open-source libraries and frameworks:
-- Python libraries (see `requirements.txt`)
-- JavaScript libraries (see `package.json`)
-- Solidity libraries (see smart contracts)
-
-Each third-party component is governed by its respective license. Please refer to individual license files for details.
-
-### Disclaimer
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-### Contact for Licensing Questions
-
-For inquiries regarding licensing, attribution, or other copyright-related matters, please contact:
-
-**Email**: akhilsreeram663@gmail.com  
-**GitHub**: [@sreeramakhil](https://github.com/sreeramakhil)
+MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
 ## 📧 Contact
 
-**Developer**: [sreeramakhil](https://github.com/sreeramakhil)
+**Developer**: [Sreerama Akhil](https://github.com/sreeramakhil)
 
 - **GitHub**: [@sreeramakhil](https://github.com/sreeramakhil)
 - **Email**: akhilsreeram663@gmail.com
 - **Live Demo**: [securattend.vercel.app](https://securattend.vercel.app)
-- **Repository**: [attendance_management_system](https://github.com/sreeramakhil/attendance_management_system)
 
 ---
 
-**Made with ❤️ by [sreeramakhil](https://github.com/sreeramakhil)**
+<div align="center">
 
-*Last updated: June 2026*
+**Made with ❤️ by Sreerama Akhil**
+
+⭐ If you find this project useful, please give it a star!
+
+</div>
