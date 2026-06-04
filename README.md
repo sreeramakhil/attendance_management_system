@@ -437,7 +437,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 📧 Contact
 
-**Developer**: [Sreerama Akhil](https://github.com/sreeramakhil)
+**Developer**: [Sreeram Akhil](https://github.com/sreeramakhil)
 
 - **GitHub**: [@sreeramakhil](https://github.com/sreeramakhil)
 - **Email**: akhilsreeram663@gmail.com
