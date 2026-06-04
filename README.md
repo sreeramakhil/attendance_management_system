@@ -447,7 +447,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 <div align="center">
 
-**Made with ❤️ by Sreerama Akhil**
+**Made with ❤️ by Sreeram Akhil**
 
 ⭐ If you find this project useful, please give it a star!
 
